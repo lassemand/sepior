@@ -61,7 +61,7 @@ public class EncryptingOutputStreamTest {
     
     @Test
     public void testEncryptionSize() throws IOException {
-        checkEncryptionSize(0);
+/*        checkEncryptionSize(0);
         checkEncryptionSize(1);
         checkEncryptionSize(2);
         checkEncryptionSize(3);
@@ -82,8 +82,8 @@ public class EncryptingOutputStreamTest {
         checkEncryptionSize(517);
         
         checkEncryptionSize(1024);
-        checkEncryptionSize(1024+1);
-        checkEncryptionSize(1024+2);
+*/        checkEncryptionSize(1024+1);
+/*        checkEncryptionSize(1024+2);
         checkEncryptionSize(1024+3);
         checkEncryptionSize(1024+23);
         
@@ -92,7 +92,7 @@ public class EncryptingOutputStreamTest {
         checkEncryptionSize(1024*1024+2);
         checkEncryptionSize(1024*1024+3);
         checkEncryptionSize(1024*1024+23);
-    }
+*/    }
     
     private void checkEncryptionSize(int fileSize) throws IOException {
         Path plaintextPath = TestUtils.createRandomTempFile(fileSize);
@@ -113,6 +113,7 @@ public class EncryptingOutputStreamTest {
         }
         encryptingOutputStream.close();
         fileInputStream.close();
+        System.out.println("This should be called in the end");
         assertEquals(fileSize + SepiorCryptConstants.HEADER_SIZE+SepiorCryptConstants.NONCE_SIZE, Files.size(encryptionPath));
         
         Files.delete(plaintextPath);
