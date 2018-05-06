@@ -52,7 +52,6 @@ public class EncryptingOutputStreamTest {
         assertEquals(b1.length, b2.length);
         for(int i = 0; i < b1.length; i++){
             assertEquals("Failed at position "+i, b1[i], b2[i]);
-
         }
         Files.delete(plaintextPath);
         Files.delete(encryptionPath);
@@ -61,7 +60,7 @@ public class EncryptingOutputStreamTest {
     
     @Test
     public void testEncryptionSize() throws IOException {
-/*        checkEncryptionSize(0);
+        checkEncryptionSize(0);
         checkEncryptionSize(1);
         checkEncryptionSize(2);
         checkEncryptionSize(3);
@@ -82,8 +81,8 @@ public class EncryptingOutputStreamTest {
         checkEncryptionSize(517);
         
         checkEncryptionSize(1024);
-*/        checkEncryptionSize(1024+1);
-/*        checkEncryptionSize(1024+2);
+        checkEncryptionSize(1024+1);
+        checkEncryptionSize(1024+2);
         checkEncryptionSize(1024+3);
         checkEncryptionSize(1024+23);
         
@@ -92,7 +91,7 @@ public class EncryptingOutputStreamTest {
         checkEncryptionSize(1024*1024+2);
         checkEncryptionSize(1024*1024+3);
         checkEncryptionSize(1024*1024+23);
-*/    }
+    }
     
     private void checkEncryptionSize(int fileSize) throws IOException {
         Path plaintextPath = TestUtils.createRandomTempFile(fileSize);

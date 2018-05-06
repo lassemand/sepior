@@ -5,8 +5,8 @@ package com.sepior.streams;
 import java.io.IOException;
 import java.io.OutputStream;
 import java.util.UUID;
+import java.util.concurrent.ConcurrentLinkedQueue;
 import java.util.concurrent.Semaphore;
-import java.util.concurrent.atomic.AtomicInteger;
 
 import static sun.misc.Version.print;
 
@@ -15,32 +15,24 @@ import static sun.misc.Version.print;
  */
 public final class ConcurrentOutputStream extends OutputStream {
     private final OutputStream stream;
-    private AtomicInteger blockCounter;
-    private IOException exception;
-    private Semaphore semaphore;
-    private String uuid;
+    private Semaphore isDoneSemaphore;
+    private ConcurrentLinkedQueue<Thread> threadConcurrentLinkedQueue;
+    private ConcurrentLinkedQueue<byte[]> bufferConcurrentLinkedQueue;
 
     public ConcurrentOutputStream(OutputStream stream) {
         this.stream = stream;
-        blockCounter = new AtomicInteger(0);
-        semaphore = new Semaphore(-1);
-        uuid = UUID.randomUUID().toString();
+        isDoneSemaphore = new Semaphore(1);
+        threadConcurrentLinkedQueue = new ConcurrentLinkedQueue<>();
+        bufferConcurrentLinkedQueue = new ConcurrentLinkedQueue<>();
     }
 
     @Override
     public void write(int b) throws IOException {
-        System.out.println("b: " + b);
         byte[] bytes = new byte[]{(byte) b};
         write(bytes);
     }
 
-    @Override
-    public void write(final byte[] b, final int off, final int len) throws IOException {
-        if(len == 0)
-            return;
-        System.out.println(uuid + " len: " + len);
-        blockCounter.getAndIncrement();
-        semaphore.release();
+    private Thread createThread(final byte[] b, final int off, final int len){
         Thread thread = new Thread(new Runnable() {
             @Override
             public void run() {
@@ -49,33 +41,56 @@ public final class ConcurrentOutputStream extends OutputStream {
                         stream.write(b, off, len);
                     }
                 } catch (IOException e) {
-                    exception = e;
+                    e.printStackTrace();
                 }
-                boolean isLastElement = blockCounter.getAndDecrement() == 1;
-                if(isLastElement){
-                    semaphore.release();
-                    System.out.println("final UUID released: " + uuid);
-                }
+                if(threadConcurrentLinkedQueue.isEmpty())
+                    isDoneSemaphore.release();
+                else
+                    threadConcurrentLinkedQueue.poll().start();
             }
         });
-        thread.start();
-        try {
-            semaphore.acquire();
-            System.out.println("UUID acquire: " + uuid);
-        } catch (InterruptedException e) {
-            e.printStackTrace();
+        return thread;
+    }
+
+    @Override
+    public void write(final byte[] b, int off, int len) throws IOException
+    {
+        boolean isNoThreadsAddedYet = threadConcurrentLinkedQueue.isEmpty();
+        Thread workingThread = createThread(b.clone(), off, len);
+        bufferConcurrentLinkedQueue.add(b);
+        if(isNoThreadsAddedYet){
+            try
+            {
+                isDoneSemaphore.acquire();
+                workingThread.start();
+            } catch (InterruptedException e) {
+                e.printStackTrace();
+            }
         }
-        if(exception != null)
-            throw exception;
+        else
+            threadConcurrentLinkedQueue.add(workingThread);
     }
 
     @Override
     public void flush() throws IOException {
+        try {
+            isDoneSemaphore.acquire();
+        } catch (InterruptedException e) {
+            e.printStackTrace();
+        }
         stream.flush();
+        isDoneSemaphore.release();
     }
 
     @Override
     public void close() throws IOException {
+        try {
+            isDoneSemaphore.acquire();
+        } catch (InterruptedException e) {
+            e.printStackTrace();
+        }
+        System.out.println("Called after");
         stream.close();
+        isDoneSemaphore.release();
     }
 }
