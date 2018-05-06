@@ -1,8 +1,0 @@
-com\sepior\crypto\EncryptingOutputStream.class
-com\sepior\performance\TestUtils.class
-com\sepior\streams\ConcurrentOutputStream.class
-com\sepior\crypto\SepiorCryptConstants.class
-com\sepior\streams\StreamUtils.class
-com\sepior\crypto\DecryptingInputStream.class
-com\sepior\performance\EncryptionPerformanceTest.class
-com\sepior\crypto\SepiorCryptHeader.class

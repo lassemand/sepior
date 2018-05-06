@@ -1,5 +1,0 @@
-com\sepior\streams\ConcurrentOutputStreamTest.class
-com\sepior\streams\OutputStreamWithIOException.class
-com\sepior\streams\ConcurrentOutputStreamTest$SlowOutputStream.class
-com\sepior\crypto\EncryptingOutputStreamTest.class
-com\sepior\crypto\HeaderTest.class
